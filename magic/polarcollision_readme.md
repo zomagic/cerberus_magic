@@ -1,4 +1,4 @@
-This is a collision detaction module for CerberusX. The idea come from a question post by someone at stackoverflow.com answer by @Blindman67 about the idea of having fast but almost pixel perfect collision using Polar cordinet.
+This is a collision detection module for CerberusX. The idea come from a question post by someone at stackoverflow.com answer by @Blindman67 about the idea of having fast but almost pixel perfect collision using Polar coordinate. 
 
 ![polarcollision_concept](polarcollision_concept.jpg)
 
