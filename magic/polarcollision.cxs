@@ -1,0 +1,481 @@
+'Refrence and idea:
+'https://stackoverflow.com/questions/36012563/how-to-do-pixel-perfect-collision-detection-of-two-partially-transparent-images
+
+'The MIT License (MIT)
+'
+'Copyright (c) 2019 Zolkefli Mohamad (magic)
+'
+'Permission is hereby granted, free of charge, To any person obtaining a copy
+'of this software And associated documentation files (the "Software"), To deal
+'in the Software without restriction, including without limitation the rights
+'To use, copy, modify, merge, publish, distribute, sublicense, and/Or sell
+'copies of the Software, And To permit persons To whom the Software is
+'furnished To do so, subject To the following conditions:
+
+'The above copyright notice And this permission notice shall be included in
+'all copies Or substantial portions of the Software.
+
+'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+'IMPLIED, INCLUDING BUT Not LIMITED To THE WARRANTIES OF MERCHANTABILITY,
+'FITNESS For A PARTICULAR PURPOSE And NONINFRINGEMENT. IN NO EVENT SHALL THE
+'AUTHORS Or COPYRIGHT HOLDERS BE LIABLE For ANY CLAIM, DAMAGES Or OTHER
+'LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT Or OTHERWISE, ARISING FROM,
+'OUT OF Or IN CONNECTION WITH THE SOFTWARE Or THE USE Or OTHER DEALINGS IN
+'THE SOFTWARE.
+
+Import mojo
+
+Class MagicPolar 
+	private
+		Field imgHnd:Image
+		Field path_:String
+		Field HndX_:Float,HndY_:Float
+		Field fail:Int
+		Field data:Int[]
+		Field dataMax:Int=0
+		Field dataMin:Int=10000
+		Field init:Bool
+	public
+		Const POLARANGLE=20
+		Function IsPolarCollade:Bool(sprite1:MagicPolar,sprite2:MagicPolar,x1:Int,y1:Int,x2:Int,y2:Int)
+			Local xd:Int = x2 - x1
+			Local yd:Int = y2 - y1
+			Local dist:Int = Sqrt((xd*xd)+(yd*yd))
+			If dist <= (sprite1.dataMax) + (sprite2.dataMax)
+				If dist <= (sprite1.dataMin) Or dist <= (sprite2.dataMin)
+					Return True
+				Else
+					Local dir:Int = ATan2(yd, xd)
+					Local dirA:Int = dir Mod 360
+					Local dirB:Int = (dir - 180) Mod 360
+					If dirA<0 Then dirA=dirA+360
+					If dirB<0 Then dirB=dirB+360
+					Local indexA:Int = Int(dirA / POLARANGLE)
+					Local indexB:Int = Int(dirB / POLARANGLE)
+					Local la:Int = sprite1.data[indexA]
+					Local lb:Int = sprite2.data[indexB]
+					If dist <= la + lb
+						Return True
+					endif
+				endif
+			endif
+			Return False
+		End
+		Function IsPolarColladeR:Bool(sprite1:MagicPolar,sprite2:MagicPolar,x1:Int,y1:Int,x2:Int,y2:Int,r1:Int=0,r2:Int=0)
+			Local xd:Int = x2 - x1
+			Local yd:Int = y2 - y1
+			Local dist:Int = Sqrt((xd*xd)+(yd*yd))
+			If dist <= (sprite1.dataMax) + (sprite2.dataMax)
+				If dist <= (sprite1.dataMin) Or dist <= (sprite2.dataMin)
+					Return True
+				Else
+					Local dir:Int = ATan2(yd, xd)
+					Local dirA:Int = (dir + r1) Mod 360
+					Local dirB:Int = (dir + r2 - 180) Mod 360
+					If dirA<0 Then dirA=dirA+360
+					If dirB<0 Then dirB=dirB+360
+					Local indexA:Int = Int(dirA / POLARANGLE)
+					Local indexB:Int = Int(dirB / POLARANGLE)
+					Local la:Int = sprite1.data[indexA]
+					Local lb:Int = sprite2.data[indexB]
+					If dist <= la + lb
+						Return True
+					endif
+				endif
+			endif
+			Return False
+		End
+		Function IsPolarColladeS:Bool(sprite1:MagicPolar,sprite2:MagicPolar,x1:Int,y1:Int,x2:Int,y2:Int,s1:Float=1.0,s2:Float=1.0)
+			Local xd:Int = x2 - x1
+			Local yd:Int = y2 - y1
+			Local dist:Int = Sqrt((xd*xd)+(yd*yd))
+			If dist <= (sprite1.dataMax * s1) + (sprite2.dataMax * s2)
+				If dist <= (sprite1.dataMin * s1) Or dist <= (sprite2.dataMin * s2)
+					Return True
+				Else
+					Local dir:Int = ATan2(yd, xd)
+					Local dirA:Int = dir Mod 360
+					Local dirB:Int = (dir - 180) Mod 360
+					If dirA<0 Then dirA=dirA+360
+					If dirB<0 Then dirB=dirB+360
+					Local indexA:Int = Int(dirA / POLARANGLE)
+					Local indexB:Int = Int(dirB / POLARANGLE)
+					Local la:Int = sprite1.data[indexA] * s1
+					Local lb:Int = sprite2.data[indexB] * s2
+					If dist <= la + lb
+						Return True
+					endif
+				endif
+			endif
+			Return False
+		End
+		Function IsPolarColladeRS:Bool(sprite1:MagicPolar,sprite2:MagicPolar,x1:Int,y1:Int,x2:Int,y2:Int,r1:Int=0,r2:Int=0,s1:Float=1.0,s2:Float=1.0)
+			Local xd:Int = x2 - x1
+			Local yd:Int = y2 - y1
+			Local dist:Int = Sqrt((xd*xd)+(yd*yd))
+			If dist <= (sprite1.dataMax * s1) + (sprite2.dataMax * s2)
+				If dist <= (sprite1.dataMin * s1) Or dist <= (sprite2.dataMin * s2)
+					Return True
+				Else
+					Local dir:Int = ATan2(yd, xd)
+					Local dirA:Int = (dir + r1) Mod 360
+					Local dirB:Int = (dir + r2 - 180) Mod 360
+					If dirA<0 Then dirA=dirA+360
+					If dirB<0 Then dirB=dirB+360
+					Local indexA:Int = Int(dirA / POLARANGLE)
+					Local indexB:Int = Int(dirB / POLARANGLE)
+					Local la:Int = sprite1.data[indexA] * s1
+					Local lb:Int = sprite2.data[indexB] * s2
+					If dist <= la + lb
+						Return True
+					endif
+				endif
+			endif
+			Return False
+		End
+		Method New(path:String,HndX:Float=0.5,HndY:Float=0.5)
+			path_=path
+			HndX_=HndX
+			HndY_=HndY
+			Load()
+		End
+		Method CreatePolarData:Void(atX:Int,atY:Int) 
+			'must call from onRender. it grap the polar for collesion
+			If init=false
+				PushMatrix()
+				Translate(atX,atY)
+				Local radius:Int=Sqrt((imgHnd.Width()*imgHnd.Width())+(imgHnd.Height()*imgHnd.Height()))
+				Local pixels:Int[]
+				pixels = pixels.Resize(radius)	
+				For Local rot:Int=0 To 359 Step POLARANGLE
+					SetColor(255,0,0)
+					DrawCircle(0,0,radius)
+					SetColor(255,255,255)
+					Draw(0,0,rot)
+					ReadPixels(pixels,atX,atY,radius,1)
+					For Local k:Int=0 Until pixels.Length()
+						Local r:Int=(pixels[k] & $FF0000) Shr 16
+						Local g:Int=(pixels[k] & $FF00) Shr 8
+						Local b:Int=(pixels[k] & $FF) 
+						If r=255 And g=0 And b=0 Then 
+							data=data.Resize(data.Length()+1)	
+							data[data.Length()-1]=k
+							If k>dataMax Then dataMax=k
+							If k<dataMin Then dataMin=k
+							Exit
+						endif
+					next
+				next
+				SetColor(0,0,0)
+				DrawCircle(0,0,radius)
+				PopMatrix()
+			endif
+			init=True
+		End
+		Method Load:Void()
+			If imgHnd=Null
+				If HndX_=0.5 And HndY_=0.5
+					imgHnd=LoadImage(path_,1,Image.MidHandle)
+				else
+					imgHnd=LoadImage(path_)
+					imgHnd.SetHandle(HndX_*imgHnd.Width(),HndY_*imgHnd.Height())
+				Endif					
+			endif
+		end
+		Method Dispose:Void()
+			If imgHnd<>Null
+				imgAHnd.Discard()  
+				imgHnd=Null
+				fail=0
+			endif
+		End
+		Method Width:Int()
+			If imgHnd=Null
+				Load()
+				Return 0
+			Else
+				fail=0
+				Return imgHnd.Width()
+			Endif		
+		End
+		Method Height:Int()
+			If imgHnd=Null
+				Load()
+				Return 0
+			Else
+				fail=0
+				Return imgHnd.Height()
+			Endif		
+		End
+		Method Draw:Void(x:Float, y:Float)
+			If imgHnd=Null
+				Load()
+			Else
+				fail=0
+				DrawImage(imgHnd,x,y)
+			Endif		
+		End
+		Method Draw:Void(x:Float,y:Float,rotation:Int)
+			If imgHnd=Null
+				Load()
+			Else
+				fail=0
+				DrawImage(imgHnd,x,y,rotation,1,1)
+			Endif		
+		End
+		Method Draw:Void(x:Float,y:Float,rotation:Int,scaleX:Float,scaleY:Float)
+			If imgHnd=Null
+				Load()
+			Else
+				fail=0
+				DrawImage(imgHnd,x,y,rotation,scaleX,scaleY)
+			Endif		
+		End		
+		Method DrawR:Void(x:Float,y:Float,srcX:Int,srcY:Int,srcWidth:Int,srcHeight:Int)
+			If imgHnd=Null
+				Load()
+			Else
+				fail=0
+				DrawImageRect(imgHnd,x,y,srcX,srcY,srcWidth,srcHeight)
+			Endif		
+		End
+End 
+Class MagicPolarAnim 
+	private
+		Field imgAHnd:Image
+		Field path_:String
+		Field HndX_:Float,HndY_:Float
+		Field frameCount_:Int
+		Field fail:Int
+		Field data:Int[][]
+		Field dataMax:Int[]
+		Field dataMin:Int[]
+		Field init:Bool
+	public
+		Const POLARANGLE=20
+		Field frame:Float
+		Field frameSpeed:Float
+		Function IsPolarCollade:Bool(sprite1:MagicPolarAnim,sprite2:MagicPolarAnim,x1:Float,y1:Float,x2:Float,y2:Float,f1:Int=-1,f2:Int=-1)
+			If f1=-1 Then f1=sprite1.frame			
+			If f2=-1 Then f2=sprite2.frame			
+			Local xd:Int = x2 - x1
+			Local yd:Int = y2 - y1
+			Local dist:Int = Sqrt((xd*xd)+(yd*yd))
+			If dist <= (sprite1.dataMax[f1]) + (sprite2.dataMax[f2])
+				If dist <= (sprite1.dataMin[f1]) Or dist <= (sprite2.dataMin[f2])
+					Return True
+				Else
+					Local dir:Int = ATan2(yd, xd)
+					Local dirA:Int = dir Mod 360
+					Local dirB:Int = (dir - 180) Mod 360
+					If dirA<0 Then dirA=dirA+360
+					If dirB<0 Then dirB=dirB+360
+					Local indexA:Int = Int(dirA / POLARANGLE)
+					Local indexB:Int = Int(dirB / POLARANGLE)
+					Local la:Int = sprite1.data[f1][indexA]
+					Local lb:Int = sprite2.data[f2][indexB]
+					If dist <= la + lb
+						Return True
+					endif
+				endif
+			endif
+			Return False
+		End
+		Function IsPolarColladeR:Bool(sprite1:MagicPolarAnim,sprite2:MagicPolarAnim,x1:Float,y1:Float,x2:Float,y2:Float,r1:Float,r2:Float,f1:Int=-1,f2:Int=-1)
+			If f1=-1 Then f1=sprite1.frame			
+			If f2=-1 Then f2=sprite2.frame			
+			Local xd:Int = x2 - x1
+			Local yd:Int = y2 - y1
+			Local dist:Int = Sqrt((xd*xd)+(yd*yd))
+			If dist <= (sprite1.dataMax[f1]) + (sprite2.dataMax[f2])
+				If dist <= (sprite1.dataMin[f1]) Or dist <= (sprite2.dataMin[f2])
+					Return True
+				Else
+					Local dir:Int = ATan2(yd, xd)
+					Local dirA:Int = Int(dir + r1) Mod 360
+					Local dirB:Int = Int(dir + r2 - 180) Mod 360
+					If dirA<0 Then dirA=dirA+360
+					If dirB<0 Then dirB=dirB+360
+					Local indexA:Int = Int(dirA / POLARANGLE)
+					Local indexB:Int = Int(dirB / POLARANGLE)
+					Local la:Int = sprite1.data[f1][indexA]
+					Local lb:Int = sprite2.data[f2][indexB]
+					If dist <= la + lb
+						Return True
+					endif
+				endif
+			endif
+			Return False
+		End
+		Function IsPolarColladeS:Bool(sprite1:MagicPolarAnim,sprite2:MagicPolarAnim,x1:Float,y1:Float,x2:Float,y2:Float,s1:Float,s2:Float,f1:Int=-1,f2:Int=-1)
+			If f1=-1 Then f1=sprite1.frame			
+			If f2=-1 Then f2=sprite2.frame			
+			Local xd:Int = x2 - x1
+			Local yd:Int = y2 - y1
+			Local dist:Int = Sqrt((xd*xd)+(yd*yd))
+			If dist <= (sprite1.dataMax[f1] * s1) + (sprite2.dataMax[f2] * s2)
+				If dist <= (sprite1.dataMin[f1] * s1) Or dist <= (sprite2.dataMin[f2] * s2)
+					Return True
+				Else
+					Local dir:Int = ATan2(yd, xd)
+					Local dirA:Int = dir Mod 360
+					Local dirB:Int = (dir - 180) Mod 360
+					If dirA<0 Then dirA=dirA+360
+					If dirB<0 Then dirB=dirB+360
+					Local indexA:Int = Int(dirA / POLARANGLE)
+					Local indexB:Int = Int(dirB / POLARANGLE)
+					Local la:Int = sprite1.data[f1][indexA] * s1
+					Local lb:Int = sprite2.data[f2][indexB] * s2
+					If dist <= la + lb
+						Return True
+					endif
+				endif
+			endif
+			Return False
+		End
+		Function IsPolarColladeRS:Bool(sprite1:MagicPolarAnim,sprite2:MagicPolarAnim,x1:Float,y1:Float,x2:Float,y2:Float,r1:Float=0,r2:Float=0,s1:Float=1.0,s2:Float=1.0,f1:Int=-1,f2:Int=-1)
+			If f1=-1 Then f1=sprite1.frame			
+			If f2=-1 Then f2=sprite2.frame			
+			Local xd:Int = x2 - x1
+			Local yd:Int = y2 - y1
+			Local dist:Int = Sqrt((xd*xd)+(yd*yd))
+			If dist <= (sprite1.dataMax[f1] * s1) + (sprite2.dataMax[f2] * s2)
+				If dist <= (sprite1.dataMin[f1] * s1) Or dist <= (sprite2.dataMin[f2] * s2)
+					Return True
+				Else
+					Local dir:Int = ATan2(yd, xd)
+					Local dirA:Int = Int(dir + r1) Mod 360
+					Local dirB:Int = Int(dir + r2 - 180) Mod 360
+					If dirA<0 Then dirA=dirA+360
+					If dirB<0 Then dirB=dirB+360
+					Local indexA:Int = Int(dirA / POLARANGLE)
+					Local indexB:Int = Int(dirB / POLARANGLE)
+					Local la:Int = sprite1.data[f1][indexA] * s1
+					Local lb:Int = sprite2.data[f2][indexB] * s2
+					If dist <= la + lb
+						Return True
+					endif
+				endif
+			endif
+			Return False
+		End
+		Method CreatePolarData:Void(atX:Int,atY:Int) 
+			'must call from ondender. it grap the polar for collesion
+			If init=false
+				PushMatrix()
+				Translate(atX,atY)
+				Local radius:Int=Sqrt((imgAHnd.Width()*imgAHnd.Width())+(imgAHnd.Height()*imgAHnd.Height()))
+				Local pixels:Int[]
+				pixels = pixels.Resize(radius)	
+				For Local frm:Int=0 Until frameCount_
+					For Local rot:Int=0 To 359 Step POLARANGLE
+						SetColor(255,0,0)
+						DrawCircle(0,0,radius)
+						SetColor(255,255,255)
+						DrawR(0,0,rot,frm)
+						ReadPixels(pixels,atX,atY,radius,1)
+						For Local k:Int=0 Until pixels.Length()
+							Local r:Int=(pixels[k] & $FF0000) Shr 16
+							Local g:Int=(pixels[k] & $FF00) Shr 8
+							Local b:Int=(pixels[k] & $FF) 
+							If r=255 And g=0 And b=0 Then 
+								data[frm]=data[frm].Resize(data[frm].Length()+1)	
+								data[frm][data[frm].Length()-1]=k
+								If k>dataMax[frm] Then dataMax[frm]=k
+								If k<dataMin[frm] Then dataMin[frm]=k
+								Exit
+							endif
+						next
+					next
+				Next
+				SetColor(0,0,0)
+				DrawCircle(0,0,radius+2)
+				PopMatrix()
+			endif
+			init=True
+		End
+		Method New(path:String,frameCount:Int,HndX:Float=0.5,HndY:Float=0.5)
+			path_=path
+			HndX_=HndX
+			HndY_=HndY
+			frameCount_=frameCount
+			frame=0
+			frameSpeed=0.5
+			dataMax=dataMax.Resize(frameCount)
+			dataMin=dataMin.Resize(frameCount)
+			data=data.Resize(frameCount)
+			For Local k:int=0 Until frameCount
+				dataMax[k]=0
+				dataMin[k]=10000
+				data[k]=[]
+			next
+			Load()
+		End
+		Method Load:Void()
+			If imgAHnd=Null
+				If HndX_=0.5 And HndY_=0.5
+					imgAHnd=LoadImage(path_,frameCount_,Image.MidHandle)
+				else
+					imgAHnd=LoadImage(path_,frameCount_)
+					imgAHnd.SetHandle(HndX_*imgAHnd.Width(),HndY_*imgAHnd.Height())
+				Endif					
+			endif
+		end
+		Method Dispose:Void()
+			If imgAHnd<>Null
+				imgAHnd.Discard()  
+				imgHnd=Null
+				fail=0
+			endif
+		End
+		Method Update:Void()
+			frame=frame+frameSpeed
+			If frame>=frameCount_ Then frame=0
+		End
+		Method Width:Int()
+			If imgAHnd=Null
+				Load()
+				Return 0
+			Else
+				fail=0
+				Return imgAHnd.Width()
+			Endif		
+		End
+		Method Height:Int()
+			If imgAHnd=Null
+				Load()
+				Return 0
+			Else
+				fail=0
+				Return imgAHnd.Height()
+			Endif		
+		End
+		Method Draw:Void(x:Float, y:Float,atFrame:Int=-1)
+			If atFrame<>-1 Then frame=atFrame
+			If imgAHnd=Null
+				Load()
+			Else
+				fail=0
+				DrawImage(imgAHnd,x,y,frame)
+			Endif		
+		End
+		Method DrawR:Void(x:Float,y:Float,rotation:Float,atFrame:Int=-1)
+			If atFrame<>-1 Then frame=atFrame
+			If imgAHnd=Null
+				Load()
+			Else
+				fail=0
+				DrawImage(imgAHnd,x,y,rotation,1,1,frame)
+			Endif		
+		End
+		Method Draw:Void(x:Float,y:Float,rotation:Float,scaleX:Float,scaleY:Float,atFrame:Int=-1)
+			If atFrame<>-1 Then frame=atFrame	
+			If imgAHnd=Null
+				Load()
+			Else
+				fail=0
+				DrawImage(imgAHnd,x,y,rotation,scaleX,scaleY,frame)
+			Endif		
+		End
+End 
+

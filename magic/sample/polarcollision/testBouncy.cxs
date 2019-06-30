@@ -1,0 +1,78 @@
+
+Import mojo
+Import magic.polarcollision
+
+Function Main();New MyApp;End
+Class MyApp Extends App
+
+	Field sprite1:MagicPolarAnim[100]
+	Field sprite1_x:Float[100]
+	Field sprite1_y:Float[100]
+	Field sprite1_sx:Float[100]
+	Field sprite1_sy:Float[100]
+	Field sprite1_r:Float[100]
+	
+	Field sprite2:MagicPolarAnim
+	Field r:Float
+	Field s:Float=1
+
+	Method OnCreate()
+		SetUpdateRate 60
+		For Local k:Int = 0 Until 100
+			sprite1[k]=New MagicPolarAnim("sprite1a.png",3,0.5,0.5)
+			sprite1[k].frameSpeed=0.02
+			sprite1_sx[k]=Rnd(1,10)
+			sprite1_sy[k]=Rnd(1,10)
+			sprite1_x[k]=Rnd(DeviceWidth())
+			sprite1_y[k]=Rnd(DeviceHeight())
+		next
+		sprite2=New MagicPolarAnim("sprite1a.png",3,0.5,0.5)
+		sprite2.frameSpeed=0.05
+	End
+	
+	Method OnUpdate()
+		'update the sprite frame
+		For Local k:Int = 0 Until 100
+			sprite1[k].Update()
+			sprite1_r[k]=sprite1_r[k]+0.1
+			If sprite1_r[k]>360 Then sprite1_r[k]=0
+			sprite1_x[k]=sprite1_x[k]+sprite1_sx[k]
+			If sprite1_x[k]>DeviceWidth() Or sprite1_x[k]<0 Then sprite1_sx[k]=-sprite1_sx[k]
+			sprite1_y[k]=sprite1_y[k]+sprite1_sy[k]
+			If sprite1_y[k]>DeviceHeight() Or sprite1_y[k]<0 Then sprite1_sy[k]=-sprite1_sy[k]
+			sprite1_r[k]=sprite1_r[k]+1
+			If sprite1_r[k]>360 Then sprite1_r[k]=0
+		next
+		sprite2.Update()
+		'some rotate and scale manipulation
+ 		r=r+0.1
+		If r>360 Then r=0
+		s=s+0.001
+		If s>2 Then s=0.1
+	End
+	
+	Method OnRender()
+	
+		'calc polar data (this will only run once)
+		For Local k:Int = 0 Until 100
+			sprite1[k].CreatePolarData(DeviceWidth()/2,DeviceHeight()/2)
+		next
+		sprite2.CreatePolarData(DeviceWidth()/2,DeviceHeight()/2)
+
+		Cls 0,0,0
+		SetColor(255,255,255)
+		
+		'check Collade 
+		For Local k:Int = 0 Until 100
+			SetColor(255,255,255)
+			If MagicPolarAnim.IsPolarColladeRS(sprite1[k],sprite2,sprite1_x[k],sprite1_y[k],MouseX(),MouseY(),sprite1_r[k],r,1,s)>0
+				SetColor(255,0,0)
+			endif
+			sprite1[k].Draw(sprite1_x[k],sprite1_y[k],sprite1_r[k],1,1)
+		Next	
+		
+		SetColor(0,255,0)	
+		sprite2.Draw(MouseX(),MouseY(),r,s,s)
+	End
+End
+

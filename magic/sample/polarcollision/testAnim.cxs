@@ -1,0 +1,52 @@
+
+Import mojo
+Import magic.polarcollision
+
+Function Main();New MyApp;End
+Class MyApp Extends App
+
+	Field sprite1:MagicPolarAnim
+	Field sprite2:MagicPolarAnim
+	Field r:Float
+	Field s:Float=1
+
+	Method OnCreate()
+		SetUpdateRate 60
+		sprite1=New MagicPolarAnim("sprite1a.png",3,0.5,0.5)
+		sprite2=New MagicPolarAnim("sprite1a.png",3,0.5,0.5)
+		sprite1.frameSpeed=0.02
+		sprite2.frameSpeed=0.02
+	End
+	
+	Method OnUpdate()
+		'update the sprite frame
+		sprite1.Update()
+		sprite2.Update()
+		'some rotate and scale manipulation
+ 		r=r+0.1
+		If r>360 Then r=0
+		s=s+0.001
+		If s>2 Then s=0.1
+	End
+	
+	Method OnRender()
+	
+		'calc polar data (this will only run once)
+		sprite1.CreatePolarData(DeviceWidth()/2,DeviceHeight()/2)
+		sprite2.CreatePolarData(DeviceWidth()/2,DeviceHeight()/2)
+
+		Cls 0,0,0
+		SetColor(255,255,255)
+		
+		'check Collade 
+		SetColor(255,255,255)
+		If MagicPolarAnim.IsPolarColladeRS(sprite1,sprite2,200,200,MouseX(),MouseY(),0,r,1,s)>0
+			SetColor(255,0,0)
+		endif
+		sprite1.Draw(200,200,0,1,1)
+		sprite2.Draw(MouseX(),MouseY(),r,s,s)
+		
+	End
+End
+
+
