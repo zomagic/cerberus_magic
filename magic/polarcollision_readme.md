@@ -2,3 +2,6 @@ Fast almost pixel perfect collision can be achieved by defining the shape of eac
 
 https://stackoverflow.com/questions/36012563/how-to-do-pixel-perfect-collision-detection-of-two-partially-transparent-images
 
+![polarcollision_concept](polarcollision_concept.jpg)
+
+
