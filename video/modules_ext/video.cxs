@@ -1,0 +1,61 @@
+'The MIT License (MIT)
+'
+'Copyright (c) 2019 Zolkefli Mohamad (magic)
+'
+'Permission is hereby granted, free of charge, To any person obtaining a copy
+'of this software And associated documentation files (the "Software"), To deal
+'in the Software without restriction, including without limitation the rights
+'To use, copy, modify, merge, publish, distribute, sublicense, and/Or sell
+'copies of the Software, And To permit persons To whom the Software is
+'furnished To do so, subject To the following conditions:
+
+'The above copyright notice And this permission notice shall be included in
+'all copies Or substantial portions of the Software.
+
+'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+'IMPLIED, INCLUDING BUT Not LIMITED To THE WARRANTIES OF MERCHANTABILITY,
+'FITNESS For A PARTICULAR PURPOSE And NONINFRINGEMENT. IN NO EVENT SHALL THE
+'AUTHORS Or COPYRIGHT HOLDERS BE LIABLE For ANY CLAIM, DAMAGES Or OTHER
+'LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT Or OTHERWISE, ARISING FROM,
+'OUT OF Or IN CONNECTION WITH THE SOFTWARE Or THE USE Or OTHER DEALINGS IN
+'THE SOFTWARE.
+
+Import mojo
+Import mojo.data
+
+#BINARY_FILES+="*.ogv|*.mp4|*.avi|"
+
+#If TARGET="html5"
+	Import "native/video.html5.js"
+	Function DrawVideo:Void(magicvideo:MagicVideo,x:Float,y:Float,w:Float,h:Float)
+		DrawCircle(x,y,0) 'to let monkey set a proper matrix for our video location
+		magicvideo.Draw(x,y,w,h)
+	End
+	Function LoadVideo:MagicVideo(path:String) 'some other format not support in mobile. making no video apopear
+		Local temp:MagicVideo=New MagicVideo
+		MagicVideo.id=MagicVideo.id+1
+		temp.Init(FixDataPath(path),MagicVideo.id)	
+		'temp.Play()
+		'temp.Pause()
+		Return temp
+	End
+	Extern
+	Class MagicVideo Extends Null="Magicvideo"'="Magicvideo"
+		Global id:Int
+		Method Init:Void(path:String,id:Int)
+		Method Draw:Void(x:Float,y:Float,w:Float,h:Float)
+		Method Play:Void()
+		Method Pause:Void()
+		Method IsPlayed:Bool()
+		Method GetCurrentTime:Int()
+		Method SetCurrentTime:Void(TimeMilli:Int)'in millisecs
+		Method GetPlaybackRate:Float()
+		Method SetPlaybackRate:Void(Rate:Float)
+		Method GetDuration:Int()
+		Method GetVolume:Float()
+		Method SetVolume:Void(Vol:Float)
+		Method SetLoop:Void(State:Bool)
+	End 
+#else
+	#Error "Error: Only support html5"
+#endif

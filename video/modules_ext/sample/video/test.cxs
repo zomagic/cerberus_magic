@@ -1,0 +1,84 @@
+Import mojo
+Import magic.video
+
+Class MyApp Extends App
+	Field video:MagicVideo 	'videohandle
+	Method OnCreate()
+		SetUpdateRate 60
+		'load video and play
+		video=LoadVideo("http://upload.wikimedia.org/wikipedia/commons/7/79/Big_Buck_Bunny_small.ogv")	
+		video.Play()
+	End
+	Method OnUpdate()
+		If TouchHit()
+			If video.IsPlayed
+				Print "PAUSE"
+				video.Pause()
+			Else
+				Print "CONTINUE"
+				video.SetCurrentTime(280000)
+				video.Play()
+				video.SetVolume(1)
+			endif
+		endif
+ 	End
+	Method OnRender()
+		Cls 0,0,150
+		PushMatrix()
+		Translate(200,125)
+		Rotate(MouseX())
+		Scale 0.9,0.9
+			DrawVideo(video,-200,-125,400,250) 	'set where to draw video
+			DrawText("magic.video module",-190,-115)
+		PopMatrix()
+		Local percentage:Float=(100.0*(video.GetCurrentTime/Float(video.GetDuration)))
+		DrawText(percentage+" %",10,300)
+		DrawText("Click to PAUSE / RESUME video",10,320)
+		SetColor(0,0,0)
+		DrawRect(10,210,402,20)
+		SetColor(255,0,0)
+		DrawRect(11,211,(percentage/100.0)*400,18)
+	End
+	Method OnSuspend()
+		Print "OnSuspend"
+	End
+	Method OnResume()
+		Print "OnResume"
+	End
+End
+Function Main()
+	New MyApp	
+End
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'-<JumpIDE_markerpos>
+'-<JumpIDE_cursorpos>33
+'-<JumpIDE_importantline1>0
+'-<JumpIDE_importantline2>2563
+'-<JumpIDE_importantline3>2574
+'-<JumpIDE_importantline4>2057
+'-<JumpIDE_importantline5>2068
+'-<JumpIDE_importantline6>2178
+'-<JumpIDE_importantline7>2200
+'-<JumpIDE_importantline8>2541
+'-<JumpIDE_importantline9>2189
+'-<JumpIDE_importantline10>2552
